@@ -1,16 +1,17 @@
 using UnityEngine;
 using UnityEngine.AI;
-
-using UnityEngine;
-using UnityEngine.AI;
 public class AgentSimpleController : MonoBehaviour
 {
     public Transform Target;
     private NavMeshAgent agent;
+    public float range ;
+    Transform player;
 
     void Start()
     {
         agent = GetComponent<NavMeshAgent>();
+          GetComponent<CapsuleCollider>().radius = range;
+        
     }
 
     // Update is called once per frame
@@ -28,6 +29,17 @@ public class AgentSimpleController : MonoBehaviour
         if (other.transform == Target)
         {
             Destroy(gameObject); // Destruye el agente
+        }
+    }
+    private void OnDrawGizmos()
+    {
+        Gizmos.color = Color.red;
+        if ( player != null)
+        {
+            Gizmos.color = Color.red;
+
+            Vector3 dir = player.position - transform.position;
+            Gizmos.DrawRay(transform.position, dir);
         }
     }
 }

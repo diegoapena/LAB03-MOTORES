@@ -19,12 +19,15 @@ public class PlayerController : MonoBehaviour
     public float dashForce = 20f;
     public float dashDuration = 0.5f;
     private float dashTimer = 0f;
+    private bool isSprinting = false;
+    private float baseMoveSpeed ;
 
 
     private void Awake()
     {
         inputs = new ();
         controller = GetComponent<CharacterController>();
+        baseMoveSpeed = moveSpeed;
     }
     private void OnEnable()
     {
@@ -32,11 +35,12 @@ public class PlayerController : MonoBehaviour
         inputs.Player.Move.performed += ctx => moveInput = ctx.ReadValue<Vector2>();
         inputs.Player.Move.canceled += ctx => moveInput = Vector2.zero;
         inputs.Player.Jump.performed += Jump_performed;
-        inputs.Player.Sprint.performed += OnDash;
+        inputs.Player.Dash.performed += OnDash;
+        inputs.Player.Sprint.performed += OnSprint;
+        inputs.Player.Sprint.canceled += OnSprintCanceled;
     }
 
-    
-
+   
     void Start()
     {
         
@@ -55,8 +59,10 @@ public class PlayerController : MonoBehaviour
     public void Movement()
     {
         transform.Rotate(Vector3.up * moveInput.x * rotationSpeed * Time.deltaTime);
+        float currentSpeed = isSprinting ? baseMoveSpeed * 3: baseMoveSpeed;
 
-        Vector3 moveDir = transform.forward * moveSpeed * moveInput.y ;
+
+        Vector3 moveDir = transform.forward * currentSpeed * moveInput.y ;
         verticalVelocity += Physics.gravity.y * Time.deltaTime;
 
         if(controller.isGrounded && verticalVelocity < 0)
@@ -77,19 +83,22 @@ public class PlayerController : MonoBehaviour
                 IsDashing = false;
 
         }
+       
 
-        
         controller.Move(moveDir * Time.deltaTime);
 
 
     }
+    /* 
     public void OnSimpleMovement()
     {
         transform.Rotate(Vector3.up * moveInput.x * rotationSpeed * Time.deltaTime);
+        
 
         Vector3 moveDir = transform.forward * moveSpeed * moveInput.y;
         controller.SimpleMove(moveDir);
     }
+    */
 
 
     private void Jump_performed(InputAction.CallbackContext context)
@@ -108,5 +117,26 @@ public class PlayerController : MonoBehaviour
     {
         IsDashing = true;
         dashTimer = dashDuration;
+    }
+    private void OnSprint(InputAction.CallbackContext context)
+    {
+        isSprinting = true;
+    }
+    private void OnSprintCanceled(InputAction.CallbackContext context)
+    {
+        isSprinting = false;
+    }
+    private void OnDrawGizmos()
+    {
+        Gizmos.color = Color.red;
+
+        // Punto de inicio del rayo (posición del objeto)
+        Vector3 start = transform.position;
+
+        // Dirección del rayo (hacia adelante desde el objeto)
+        Vector3 direction = transform.forward.normalized;
+
+        // Dibujar el rayo desde la posición del objeto hacia adelante
+        Gizmos.DrawRay(start, direction * 5f); // El 5f es la longitud del rayo
     }
 }
