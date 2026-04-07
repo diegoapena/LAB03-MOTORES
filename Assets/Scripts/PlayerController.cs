@@ -1,5 +1,6 @@
 using System;
 using System.Threading;
+using Unity.Cinemachine;
 using UnityEngine;
 using UnityEngine.InputSystem;
 
@@ -21,6 +22,7 @@ public class PlayerController : MonoBehaviour
     private float dashTimer = 0f;
     private bool isSprinting = false;
     private float baseMoveSpeed ;
+    public CinemachineCamera characterCamara;
 
 
     private void Awake()
@@ -28,6 +30,9 @@ public class PlayerController : MonoBehaviour
         inputs = new ();
         controller = GetComponent<CharacterController>();
         baseMoveSpeed = moveSpeed;
+        Cursor.visible = false;
+        Cursor.lockState = CursorLockMode.Locked;
+
     }
     private void OnEnable()
     {
@@ -58,11 +63,29 @@ public class PlayerController : MonoBehaviour
 
     public void Movement()
     {
+        Vector3 cameraForwardDir = characterCamara.transform.forward;
+        cameraForwardDir.y = 0;
+        cameraForwardDir.Normalize();
+
+        if(moveInput!= Vector2.zero)
+        {
+            Quaternion targetQuaternion = Quaternion.LookRotation(cameraForwardDir, Vector3.up);
+            //transform.rotation = targetQuaternion;
+            transform.rotation = Quaternion.Slerp(
+            transform.rotation,
+            targetQuaternion, rotationSpeed * Time.deltaTime);
+        }
+       
+
         transform.Rotate(Vector3.up * moveInput.x * rotationSpeed * Time.deltaTime);
         float currentSpeed = isSprinting ? baseMoveSpeed * 3: baseMoveSpeed;
-
-
-        Vector3 moveDir = transform.forward * currentSpeed * moveInput.y ;
+        Vector3 moveDir = cameraForwardDir * currentSpeed * moveInput.y ;
+        
+        
+        
+        
+        
+        
         verticalVelocity += Physics.gravity.y * Time.deltaTime;
 
         if(controller.isGrounded && verticalVelocity < 0)
