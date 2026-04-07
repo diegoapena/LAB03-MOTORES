@@ -1,9 +1,9 @@
 using UnityEngine;
 using UnityEngine.InputSystem;
 
-public class Cannon : MonoBehaviour
+public class BombSpawner : MonoBehaviour
 {
-    public GameObject cannonBallPrefab;
+    public GameObject bomb;
     public Transform spawnPoint;
     public float force;
 
@@ -34,7 +34,7 @@ public class Cannon : MonoBehaviour
     public void Fire()
     {
         // Instancia la bala y aplica la fuerza
-        GameObject _go = Instantiate(cannonBallPrefab, spawnPoint.position, Quaternion.identity);
+        GameObject _go = Instantiate(bomb, spawnPoint.position, Quaternion.identity);
         Rigidbody rigidbody = _go.GetComponent<Rigidbody>();
         rigidbody.AddForce(transform.forward * force, ForceMode.Impulse);
     }
